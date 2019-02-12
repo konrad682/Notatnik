@@ -16,6 +16,11 @@ public class TaskActivity extends AppCompatActivity {
     private TextView mDescribeTextView;
     private TextView mTitleTextView;
 
+
+    public static final String EXTRA_ID = "com.codinginflow.architectureexample.EXTRA_ID";
+    public static final String EXTRA_TITLE = "com.codinginflow.architectureexample.EXTRA_TITLE";
+    public static final String EXTRA_DESCRIPTION = "com.codinginflow.architectureexample.EXTRA_DESCRIPTION";
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -23,6 +28,13 @@ public class TaskActivity extends AppCompatActivity {
 
         mDescribeTextView = (TextView) findViewById(R.id.contentEditText);
         mTitleTextView = (TextView) findViewById(R.id.titleEditText);
+
+        Intent intent = getIntent();
+
+        if(intent.hasExtra(EXTRA_ID)){
+            mTitleTextView.setText(intent.getStringExtra(EXTRA_TITLE));
+            mDescribeTextView.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
+        }
 
         checkActionBar();
 
@@ -47,11 +59,16 @@ public class TaskActivity extends AppCompatActivity {
 
         if(id == R.id.action_save){
             Toast.makeText(this,"ok",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent();
 
+            Intent intent = new Intent();
+            int id_task = getIntent().getIntExtra(EXTRA_ID,-1);
+            if(id_task != -1) {
+                intent.putExtra(EXTRA_ID,  id_task);
+            }
             intent.putExtra("desc",mDescribeTextView.getText().toString());
             intent.putExtra("title",mTitleTextView.getText().toString());
             setResult(Activity.RESULT_OK,intent);
+
             finish();
             return true;
         }
