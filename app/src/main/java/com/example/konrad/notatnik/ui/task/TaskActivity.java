@@ -1,11 +1,16 @@
 package com.example.konrad.notatnik.ui.task;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +33,6 @@ public class TaskActivity extends AppCompatActivity {
 
         mDescribeTextView = (TextView) findViewById(R.id.contentEditText);
         mTitleTextView = (TextView) findViewById(R.id.titleEditText);
-
         Intent intent = getIntent();
 
         if(intent.hasExtra(EXTRA_ID)){
@@ -41,10 +45,8 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     public void checkActionBar(){
-        if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);  
     }
 
     @Override
@@ -62,6 +64,7 @@ public class TaskActivity extends AppCompatActivity {
 
             Intent intent = new Intent();
             int id_task = getIntent().getIntExtra(EXTRA_ID,-1);
+
             if(id_task != -1) {
                 intent.putExtra(EXTRA_ID,  id_task);
             }
@@ -79,6 +82,26 @@ public class TaskActivity extends AppCompatActivity {
         if (id == R.id.action_delete){
             Toast.makeText(this,"Delete",Toast.LENGTH_SHORT).show();
 
+            return true;
+        }
+
+        if (id == R.id.action_back){
+            Toast.makeText(this,"Undo",Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(TaskActivity.this);
+            builder.setMessage("Do you want undo all changes ?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                           finish();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
             return true;
         }
 

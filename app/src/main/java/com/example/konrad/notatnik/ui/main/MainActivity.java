@@ -1,17 +1,18 @@
 package com.example.konrad.notatnik.ui.main;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -22,23 +23,17 @@ import com.example.konrad.notatnik.ui.main.adapter.MyAdapter;
 import com.example.konrad.notatnik.ui.main.storage.StorageTask;
 import com.example.konrad.notatnik.ui.task.TaskActivity;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
     static final int PICK_CONTACT_REQUEST = 1;
     static final int PICK_CONTACT_REQUEST_EDIT = 2;
-    private int max_ID = 0;
     private Context mContext = this;
     private RecyclerView mRecyclerView;
     private ArrayList<StorageTask> mArrayListStorageTask = new ArrayList<>();
@@ -55,10 +50,13 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recyclerViewList);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setHasFixedSize(true);
-
         myAdapter = new MyAdapter(mArrayListStorageTask);
         mRecyclerView.setAdapter(myAdapter);
 
+        myAdapterClick();
+    }
+
+    public void myAdapterClick(){
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -71,16 +69,42 @@ public class MainActivity extends AppCompatActivity {
 
         myAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(StorageTask storagetask) {
+            public void onItemClick(StorageTask storagetask,int position) {
                 Intent intent = new Intent(MainActivity.this, TaskActivity.class);
-                intent.putExtra(TaskActivity.EXTRA_ID, storagetask.getmOwn_ID());
+                intent.putExtra(TaskActivity.EXTRA_ID, position);
                 intent.putExtra(TaskActivity.EXTRA_TITLE, storagetask.getmTitle());
                 intent.putExtra(TaskActivity.EXTRA_DESCRIPTION,storagetask.getmDescription());
                 startActivityForResult(intent,PICK_CONTACT_REQUEST_EDIT);
             }
         });
 
+        myAdapter.setOnItemLongClickListener(new MyAdapter.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(int position) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("Do you want delete note '" + mArrayListStorageTask.get(position).getmTitle() +"'. You cann't restore")
+                        .setCancelable(false)
+                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                myAdapter.deleteTask(position);
+                                myAdapter.notifyItemRemoved(position);
+                                myAdapter.notifyItemRangeChanged(position, myAdapter.getItemCount());
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+                return true;
+            }
+        });
     }
+
     @Override
     protected  void onPause(){
         super.onPause();
@@ -88,18 +112,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected  void onResume(){
+        super.onResume();
+        myAdapterClick();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         int id = 0;
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
 
         if (requestCode == PICK_CONTACT_REQUEST) {
             if(resultCode == RESULT_OK){
 
                 String title = data.getStringExtra("title");
                 String desc = data.getStringExtra("desc");
-                StorageTask storageTask = new StorageTask(title,desc,max_ID);
-                max_ID++;
 
+                StorageTask storageTask = new StorageTask(title,desc,formattedDate);
                 mArrayListStorageTask.add(storageTask);
 
                 SaveData();
@@ -115,16 +148,16 @@ public class MainActivity extends AppCompatActivity {
 
                     mArrayListStorageTask.get(id).setmDescription(desc);
                     mArrayListStorageTask.get(id).setmTitle(title);
+                    mArrayListStorageTask.get(id).setmLastModificationDate(formattedDate);
                     SaveData();
                 }
 
         }
 
-        SharedPreferences settings = getSharedPreferences("ID", MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putInt("id_max",max_ID);
-        Log.v("Save","value: "+ max_ID);
-        editor.commit();
+//        SharedPreferences settings = getSharedPreferences("ID", MODE_PRIVATE);
+//        SharedPreferences.Editor editor = settings.edit();
+//        editor.putInt("id_max",max_ID);
+//        editor.commit();
 
         myAdapter= new MyAdapter(mArrayListStorageTask);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -138,10 +171,8 @@ public class MainActivity extends AppCompatActivity {
         Type type = new TypeToken<ArrayList<StorageTask>>() {}.getType();
         mArrayListStorageTask = gson.fromJson(json,type);
 
-        SharedPreferences settings = getSharedPreferences("ID", 0);
-        max_ID = settings.getInt("id_max", 0);
-
-        Log.v("Load","value: "+ max_ID);
+//        SharedPreferences settings = getSharedPreferences("ID", 0);
+//        max_ID = settings.getInt("id_max", 0);
 
         if(mArrayListStorageTask == null){
             mArrayListStorageTask = new ArrayList<>();

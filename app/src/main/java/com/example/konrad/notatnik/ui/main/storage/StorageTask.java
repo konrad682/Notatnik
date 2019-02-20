@@ -1,22 +1,26 @@
 package com.example.konrad.notatnik.ui.main.storage;
 
 public class StorageTask {
-    private String mTitle = "Bez nazwy";
-    private String mDescription= "Brak opisu";
-    private int mOwn_ID;
+    private String mTitle;
+    private String mDescription;
+    private String mLastModificationDate;
 
-    public StorageTask(String mTitle, String mDescription,int max_ID){
+    public StorageTask(String mTitle, String mDescription, String mLastModificationDate){
         this.mDescription = mDescription;
         this.mTitle = mTitle;
-        this.mOwn_ID = max_ID;
+        this.mLastModificationDate = mLastModificationDate;
     }
 
     public String getmTitle() {
         return mTitle;
     }
 
-   public int getmOwn_ID() {
-        return mOwn_ID;
+    public String getmLastModificationDate() {
+        return mLastModificationDate;
+    }
+
+    public void setmLastModificationDate(String mLastModificationDate) {
+        this.mLastModificationDate = mLastModificationDate;
     }
 
     public String getmDescription() {
