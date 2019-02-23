@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ public class TaskActivity extends AppCompatActivity {
     public static final String EXTRA_ID = "com.codinginflow.architectureexample.EXTRA_ID";
     public static final String EXTRA_TITLE = "com.codinginflow.architectureexample.EXTRA_TITLE";
     public static final String EXTRA_DESCRIPTION = "com.codinginflow.architectureexample.EXTRA_DESCRIPTION";
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -35,7 +37,7 @@ public class TaskActivity extends AppCompatActivity {
         mDescribeTextView = (TextView) findViewById(R.id.contentEditText);
         mTitleTextView = (TextView) findViewById(R.id.titleEditText);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarTask);
+       Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarTask);
         setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
@@ -46,6 +48,7 @@ public class TaskActivity extends AppCompatActivity {
 
         checkActionBar(toolbar);
     }
+
 
     public void checkActionBar(Toolbar toolbar){
 
@@ -93,8 +96,13 @@ public class TaskActivity extends AppCompatActivity {
             finish();
             return true;
         }
-        if (id == R.id.action_Share) {
+        if (id == R.id.mShare) {
+
             Toast.makeText(this,"Share",Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(android.content.Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(android.content.Intent.EXTRA_TEXT, mDescribeTextView.getText().toString());
+            startActivity(Intent.createChooser(i,"Share:"));
             return true;
         }
         if (id == R.id.action_delete){

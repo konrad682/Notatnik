@@ -2,10 +2,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.konrad.notatnik.ui.task.TaskActivity">
+
     <item
-        android:id="@+id/action_Share"
-        android:orderInCategory="100"
-        android:title="share" />
+        android:id="@+id/mShare"
+        android:title="Share"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_delete"
         android:orderInCategory="101"
