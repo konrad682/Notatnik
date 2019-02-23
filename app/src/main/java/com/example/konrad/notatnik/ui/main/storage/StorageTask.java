@@ -1,7 +1,7 @@
 package com.example.konrad.notatnik.ui.main.storage;
 
 public class StorageTask {
-    private String mTitle;
+    private String mTitle = "Bez nazwy";
     private String mDescription;
     private String mLastModificationDate;
 

@@ -13,7 +13,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -129,27 +128,37 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PICK_CONTACT_REQUEST) {
             if(resultCode == RESULT_OK){
 
-                String title = data.getStringExtra("title");
-                String desc = data.getStringExtra("desc");
+                Boolean flag = data.getBooleanExtra("flagDelete",false);
+                if(flag == false) {
 
-                StorageTask storageTask = new StorageTask(title,desc,formattedDate);
-                mArrayListStorageTask.add(storageTask);
-
-                SaveData();
-
+                    String title = data.getStringExtra("title");
+                    String desc = data.getStringExtra("desc");
+                    StorageTask storageTask = new StorageTask(title, desc, formattedDate);
+                    mArrayListStorageTask.add(storageTask);
+                    SaveData();
+                }
             } else if(requestCode == Activity.RESULT_CANCELED){
 
                 }
         }else if(requestCode == PICK_CONTACT_REQUEST_EDIT){
                 if(resultCode == RESULT_OK) {
-                    String title = data.getStringExtra("title");
-                    String desc = data.getStringExtra("desc");
-                    id = data.getIntExtra(TaskActivity.EXTRA_ID, -1);
 
-                    mArrayListStorageTask.get(id).setmDescription(desc);
-                    mArrayListStorageTask.get(id).setmTitle(title);
-                    mArrayListStorageTask.get(id).setmLastModificationDate(formattedDate);
-                    SaveData();
+                    Boolean flag = data.getBooleanExtra("flagDelete",false);
+                    id = data.getIntExtra(TaskActivity.EXTRA_ID, -1);
+                    if(flag == false) {
+
+                        String title = data.getStringExtra("title");
+                        String desc = data.getStringExtra("desc");
+
+                        mArrayListStorageTask.get(id).setmDescription(desc);
+                        mArrayListStorageTask.get(id).setmTitle(title);
+                        mArrayListStorageTask.get(id).setmLastModificationDate(formattedDate);
+                        SaveData();
+                    } else{
+                            myAdapter.deleteTask(id);
+                            myAdapter.notifyItemRemoved(id);
+                            myAdapter.notifyItemRangeChanged(id, myAdapter.getItemCount());
+                         }
                 }
 
         }
@@ -199,10 +208,20 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_information) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("Version 1.0.0\n" + "Created by Konrad W")
+                    .setCancelable(false)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }

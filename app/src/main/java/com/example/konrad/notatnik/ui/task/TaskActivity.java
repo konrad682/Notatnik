@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.example.konrad.notatnik.R;
 
+
 public class TaskActivity extends AppCompatActivity {
 
     private TextView mDescribeTextView;
@@ -33,20 +34,32 @@ public class TaskActivity extends AppCompatActivity {
 
         mDescribeTextView = (TextView) findViewById(R.id.contentEditText);
         mTitleTextView = (TextView) findViewById(R.id.titleEditText);
-        Intent intent = getIntent();
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarTask);
+        setSupportActionBar(toolbar);
+
+        Intent intent = getIntent();
         if(intent.hasExtra(EXTRA_ID)){
             mTitleTextView.setText(intent.getStringExtra(EXTRA_TITLE));
             mDescribeTextView.setText(intent.getStringExtra(EXTRA_DESCRIPTION));
         }
 
-        checkActionBar();
-
+        checkActionBar(toolbar);
     }
 
-    public void checkActionBar(){
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);  
+    public void checkActionBar(Toolbar toolbar){
+
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     @Override
@@ -68,8 +81,13 @@ public class TaskActivity extends AppCompatActivity {
             if(id_task != -1) {
                 intent.putExtra(EXTRA_ID,  id_task);
             }
-            intent.putExtra("desc",mDescribeTextView.getText().toString());
+            if(mTitleTextView.getText().toString().equals("")){
+                mTitleTextView.setText("Untitled");
+            }
             intent.putExtra("title",mTitleTextView.getText().toString());
+            intent.putExtra("desc", mDescribeTextView.getText().toString());
+
+            intent.putExtra("flagDelete",false);
             setResult(Activity.RESULT_OK,intent);
 
             finish();
@@ -82,6 +100,22 @@ public class TaskActivity extends AppCompatActivity {
         if (id == R.id.action_delete){
             Toast.makeText(this,"Delete",Toast.LENGTH_SHORT).show();
 
+            Intent intent = new Intent();
+            int id_task = getIntent().getIntExtra(EXTRA_ID,-1);
+
+            if(id_task == -1) {
+               finish();
+               return true;
+            } else{
+                    intent.putExtra(EXTRA_ID,  id_task);
+                    intent.putExtra("flagDelete",true);
+                    setResult(Activity.RESULT_OK,intent);
+                    finish();
+                    return true;
+                }
+        }
+        if (id == R.id.home){
+            finish();
             return true;
         }
 
